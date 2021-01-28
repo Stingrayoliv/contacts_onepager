@@ -32,15 +32,22 @@ public class ContactService {
 
 
     public Contact get(int id) {
-        Optional<Contact> optionalContact=contactRepository.findById(id);
+        Optional<Contact> optionalContact = contactRepository.findById(id);
         return optionalContact.orElseThrow(EntityNotFoundException::new);
     }
 
     public void edit(int id, String name, String lastName, Integer age) {
+        Contact contact = get(id);
+        contact.setName(name);
+        contact.setLastName(lastName);
+        contact.setAge(age);
+        contactRepository.save(contact);
 
     }
 
     public Contact remove(int id) {
-
+        Contact contact = get(id);
+        contactRepository.deleteById(id);
+        return contact;
     }
 }
