@@ -45,11 +45,19 @@ class FormController {
             age: formDom.elements.age.value,
         };
 
+        this._cleanForm(formDom);
+
         const response = await this.contactClient.add(contact);
         if (response.ok) {
             this._init();
         }
 
+    }
+
+    _cleanForm(formDom) {
+        formDom.elements.name.value = '';
+        formDom.elements.lastName.value = '';
+        formDom.elements.age.value = '';
     }
 
     edit(event) {
