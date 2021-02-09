@@ -33,8 +33,8 @@ class ContactController {
     }
 
     remove(event) {
-        //TODO complete. Take the contact id from the event.target (see 'toEditForm' from html renderer to get contactDom -> contact)
-        // then rerender all persons
+        const contactDom = event.target.closest("li.collection-item")
+        this.contactClient.remove(contactDom.contact);
     }
 
     edit(event) {
@@ -79,11 +79,42 @@ class FormController {
             this._init();
             this.htmlRenderer.clearForm();
         }
-
     }
 
-    edit(event) {
-        //TODO complete. See method 'add'
+    async edit(event) {
+        const formDom = event.currentTarget;
+
+        const contact = {
+            id: formDom.elements.id.value,
+            name: formDom.elements.name.value,
+            lastName: formDom.elements.lastName.value,
+            age: formDom.elements.age.value,
+        };
+
+        const response = await this.contactClient.edit(contact);
+        if (response.ok) {
+
+            this.htmlRenderer.clearForm();
+            this.htmlRenderer.toAddForm();
+            this._init();
+
+        }
+    }
+
+    async remove(event) {
+        const formDom = event.currentTarget;
+
+        const contact = {
+            id: formDom.elements.id.value,
+            name: formDom.elements.name.value,
+            lastName: formDom.elements.lastName.value,
+            age: formDom.elements.age.value,
+        };
+
+        const response = await this.contactClient.remove(contact);
+        if (response.ok) {
+            this._init();
+        }
     }
 
     cancel(event) {
@@ -193,4 +224,19 @@ class ContactClient {
     }
 
     //TODO add methods edit(contact) and remove(contact)
+    edit(contact) {
+        return fetch(ContactClient.CONTACTS_PATH, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(contact)
+        });
+    }
+
+    remove(contact) {
+        return fetch(`/${contact.id}`, {
+            method: 'DELETE',
+        });
+    }
 }
