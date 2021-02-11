@@ -19,34 +19,46 @@ public class ContactService {
     }
 
     public Contact create(String name, String lastName, int age) {
-        Contact contact = new Contact(name, lastName, age);
-        contactRepository.save(contact);
+        Contact contact = new Contact( name, lastName, age );
+        contactRepository.save( contact );
         return contact;
     }
 
     public List<Contact> getAll() {
         List<Contact> res = new ArrayList<>();
-        contactRepository.findAll().forEach(res::add);
+        contactRepository.findAll().forEach( res::add );
         return res;
     }
 
-
     public Contact get(int id) {
-        Optional<Contact> optionalContact = contactRepository.findById(id);
-        return optionalContact.orElseThrow(EntityNotFoundException::new);
+        Optional<Contact> optionalContact = contactRepository.findById( id );
+        return optionalContact.orElseThrow( EntityNotFoundException::new );
     }
 
     public void edit(int id, String name, String lastName, Integer age) {
-        Contact contact = get(id);
-        contact.setLastName(name);
-        contact.setLastName(lastName);
-        contact.setAge(age);
-        contactRepository.save(contact);
+        Contact contact = get( id );
+        contact.setName( name );
+        contact.setLastName( lastName );
+        contact.setAge( age );
+        contactRepository.save( contact );
     }
 
     public Contact remove(int id) {
-        Contact res = get(id);
-        contactRepository.delete(res);
+        Contact res = get( id );
+        contactRepository.delete( res );
         return res;
+    }
+
+
+    public List<Contact> getAllByName(String name) {
+        return contactRepository.findByNameIgnoreCase( name );
+    }
+
+    public List<Contact> getAllByLastName(String lastName) {
+        return contactRepository.findByLastNameIgnoreCase(lastName);
+    }
+
+    public List<Contact> getAllByLastNameAndByName(String lastName, String name) {
+        return contactRepository.findByLastNameAndNameIgnoreCase( lastName, name );
     }
 }

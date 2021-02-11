@@ -11,63 +11,29 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/contacts")
-public class Controller {
+public class ContactRestController {
+
     final ContactService contactService;
 
-    public Controller(ContactService contactService) {
+    public ContactRestController(ContactService contactService) {
         this.contactService = contactService;
     }
 
     @PostMapping
     public ContactDto create(@RequestBody ContactDto contactDto) {
-        Contact contact = contactService.create(contactDto.name, contactDto.lastName,
-                contactDto.age);
+        Contact contact = contactService.create(
+                contactDto.name,
+                contactDto.lastName,
+                contactDto.age );
+
         contactDto.id = contact.getId();
         return contactDto;
     }
 
     @GetMapping("{id}")
     public ContactDto get(@PathVariable int id) {
-        Contact contact = contactService.get(id);
+        Contact contact = contactService.get( id );
 
-        ContactDto contactDto = new ContactDto(
-                contact.getId(),
-                contact.getName(),
-                contact.getLastName(),
-                contact.getAge()
-        );
-        return contactDto;
-    }
-
-    @GetMapping
-    public List<ContactDto> getAll() {
-        List<Contact> contacts = contactService.getAll();
-
-        return contacts.stream().
-                map(contact -> new ContactDto(
-                        contact.getId(),
-                        contact.getName(),
-                        contact.getLastName(),
-                        contact.getAge()
-                ))
-                .collect(Collectors.toList());
-    }
-
-    @PutMapping
-    //not necessary
-    @ResponseStatus(HttpStatus.NO_CONTENT)//204 status
-    public void edit(@RequestBody ContactDto contactDto) {
-        contactService.edit(
-                contactDto.id,
-                contactDto.name,
-                contactDto.lastName,
-                contactDto.age
-        );
-    }
-
-    @DeleteMapping("{id}")
-    public ContactDto remove(@PathVariable int id) {
-        Contact contact = contactService.get(id);
         return new ContactDto(
                 contact.getId(),
                 contact.getName(),
@@ -76,4 +42,48 @@ public class Controller {
         );
     }
 
+    @GetMapping
+    public List<ContactDto> getAll(@RequestParam(value = "lastName", required = false) String lastName,
+                                   @RequestParam(value = "name", required = false) String name) {
+        List<Contact> contacts;
+        if (name != null && lastName != null) {
+            contacts = contactService.getAllByLastNameAndByName( lastName, name );
+        } else if (lastName == null && name != null) {
+            contacts = contactService.getAllByName( name );
+        } else if (name == null && lastName != null) {
+            contacts = contactService.getAllByLastName( lastName );
+        } else {
+            contacts = contactService.getAll();
+        }
+        return contacts.stream()
+                .map( contact -> new ContactDto(
+                        contact.getId(),
+                        contact.getName(),
+                        contact.getLastName(),
+                        contact.getAge()
+                ) )
+                .collect( Collectors.toList() );
+    }
+
+    @PutMapping
+    // not necessary
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void edit(@RequestBody ContactDto contactDto) {
+        contactService.edit(
+                contactDto.id,
+                contactDto.name,
+                contactDto.lastName,
+                contactDto.age );
+    }
+
+    @DeleteMapping("{id}")
+    public ContactDto remove(@PathVariable int id) {
+        Contact contact = contactService.remove( id );
+        return new ContactDto(
+                contact.getId(),
+                contact.getName(),
+                contact.getLastName(),
+                contact.getAge()
+        );
+    }
 }
